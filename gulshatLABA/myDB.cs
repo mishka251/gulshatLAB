@@ -115,5 +115,33 @@ namespace gulshatLABA
             return res;
         }
 
+
+        public static void INSERT(string table, DataTable values)
+        {
+            SqlCommand cmd = sqlConnection.CreateCommand();
+
+            string[] lines = new string[values.Rows.Count];
+            for (int i = 0; i < lines.Length; i++)
+            {
+
+
+
+                string[] param = new string[values.Columns.Count];
+                for (int j = 0; j < values.Columns.Count; j++)
+                {
+                    string par_name = $"@param{i}{j}";
+                    param[j] = par_name;
+                    cmd.Parameters.Add(new SqlParameter(par_name, values.Rows[i][j]));
+                }
+                lines[i] = "(" + String.Join(",", param )+ ")";
+
+            }
+
+            string vals = String.Join(", ", lines);
+            cmd.CommandText = $"INSERT INTO {table} VALUES {vals};";
+            cmd.ExecuteNonQuery();
+        }
+
+
     }
 }
