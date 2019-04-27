@@ -143,5 +143,23 @@ namespace gulshatLABA
         }
 
 
+        public static void DELETE(string table, string condition = "", object[] param=null)
+        {
+            SqlCommand command = sqlConnection.CreateCommand();
+
+            
+            string SQL = $"DELETE FROM {table}";
+            if (condition != "")
+            {
+                SQL += $" WHERE {condition}";
+                for (int i = 0; i < param.Length; i++)
+                    command.Parameters.Add(new SqlParameter($"@param{i}", param[i]));
+            }
+            command.CommandText = SQL;
+            command.ExecuteNonQuery();
+        }
+
+
+
     }
 }
