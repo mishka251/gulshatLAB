@@ -97,6 +97,12 @@
     <Compile Include="Tovar.Designer.cs">
       <DependentUpon>Tovar.cs</DependentUpon>
     </Compile>
+    <Compile Include="WorkForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkForm.Designer.cs">
+      <DependentUpon>WorkForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Zakaz.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -127,6 +133,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Tovar.resx">
       <DependentUpon>Tovar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkForm.resx">
+      <DependentUpon>WorkForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Zakaz.resx">
       <DependentUpon>Zakaz.cs</DependentUpon>

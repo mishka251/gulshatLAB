@@ -133,7 +133,7 @@ namespace gulshatLABA
                     param[j] = par_name;
                     cmd.Parameters.Add(new SqlParameter(par_name, values.Rows[i][j]));
                 }
-                lines[i] = "(" + String.Join(",", param )+ ")";
+                lines[i] = "(" + String.Join(",", param) + ")";
 
             }
 
@@ -143,11 +143,11 @@ namespace gulshatLABA
         }
 
 
-        public static void DELETE(string table, string condition = "", object[] param=null)
+        public static void DELETE(string table, string condition = "", object[] param = null)
         {
             SqlCommand command = sqlConnection.CreateCommand();
 
-            
+
             string SQL = $"DELETE FROM {table}";
             if (condition != "")
             {
@@ -159,7 +159,79 @@ namespace gulshatLABA
             command.ExecuteNonQuery();
         }
 
+        public static DataTable callProc(string name, List<(string, object)> args)
+        {
+            DataTable res = new DataTable();
+            SqlCommand command = sqlConnection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = name;
+
+            foreach ((string parName, object parVal) in args)
+                command.Parameters.Add(new SqlParameter(parName, parVal));
+
+            try
+            {
+                var reader = command.ExecuteReader();
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    res.Columns.Add(reader.GetName(i));
+                }
+                while (reader.Read())
+                {
+                    object[] line = new object[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        line[i] = reader.GetValue(i);
+                    }
+
+                    res.Rows.Add(line);
+                }
+                reader.Close();
+                return res;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return null;
+            }
 
 
+        }
+        public static void Update(string tableName, DataTable newTable)
+        {
+
+        }
+
+        public static void Update(string table, List<(string, object)> vals, List<(string, object)> conditions)
+        {
+            SqlCommand command = sqlConnection.CreateCommand();
+
+            string set = "";
+            List<string> sets = new List<string>();
+            foreach ((string name, object val) in vals)
+            {
+                string pName = $"@{name}1";
+
+                sets.Add($"{ name} = {pName}");
+                command.Parameters.Add(new SqlParameter(pName, val));
+
+            }
+            set = String.Join(", ", sets);
+            string where = "";
+            List<string> conds = new List<string>();
+            foreach ((string name, object val) in conditions)
+            {
+                string pName = $"@{name}2";
+                conds.Add($"{ name} = {pName} ");
+                command.Parameters.Add(new SqlParameter(pName, val));
+
+            }
+
+            where = String.Join(" AND ", conds);
+
+            string sql = $"UPDATE {table} SET {set} WHERE {where}";
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
+        }
     }
 }

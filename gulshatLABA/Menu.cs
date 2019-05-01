@@ -52,5 +52,11 @@ namespace gulshatLABA
             Client c = new Client();
             c.Show();
         }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            WorkForm w = new WorkForm();
+            w.Show();
+        }
     }
 }
