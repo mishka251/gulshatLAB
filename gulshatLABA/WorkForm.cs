@@ -12,10 +12,13 @@ namespace gulshatLABA
 {
     public partial class WorkForm : Form
     {
-        public WorkForm()
+        int id;
+        public WorkForm(int id = 0)
         {
             InitializeComponent();
+            this.id = id;
         }
+        Dictionary<string, string> ShopNameForId;
         Dictionary<string, int> ShopIDForName;
         Dictionary<int, List<string>> possibleShopsForTovID;
 
@@ -34,7 +37,7 @@ namespace gulshatLABA
                 int tovar = int.Parse((string)dataGridView1.Rows[i].Cells[7].Value);
                 //newCol.
                 foreach (string shopID in possibleShopsForTovID[tovar])
-                    newCol.Items.Add(shopID);
+                    newCol.Items.Add(ShopNameForId[shopID]);
             }
             newCol.HeaderText = column.HeaderText;
             dataGridView1.Columns.Add(newCol);
@@ -48,12 +51,13 @@ namespace gulshatLABA
                 DataGridViewComboBoxCell cell = dataGridView1[9, i] as DataGridViewComboBoxCell;
                 cell.Items.Clear();
                 foreach (string shopID in possibleShopsForTovID[tovar])
-                    cell.Items.Add(shopID);
+                    cell.Items.Add(ShopNameForId[shopID]);
             }
 
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                dataGridView1[9, i].Value = oldVals[i];
+                if(oldVals[i]!=null&&(string)oldVals[i]!="")
+                dataGridView1[9, i].Value = ShopNameForId[ (string)oldVals[i]];
             }
             dataGridView1.DataError += DataGridView1_DataError;
         }
@@ -76,10 +80,12 @@ namespace gulshatLABA
             DataTable shops = myDB.SELECT_ALL("Shop");
 
             ShopIDForName = new Dictionary<string, int>();
+            ShopNameForId = new Dictionary<string, string>();
             for (int i = 0; i < shops.Rows.Count; i++)
             {
                 var row = shops.Rows[i];
                 ShopIDForName.Add((string)row.ItemArray[1], int.Parse((string)row.ItemArray[0]));
+                ShopNameForId.Add((string)row.ItemArray[0], (string)row.ItemArray[1]);
             }
         }
 
@@ -116,7 +122,15 @@ namespace gulshatLABA
         void LoadTable()
         {
             dataGridView1.Columns.Clear();
-            table = myDB.SELECT_ALL("ZakazInfo6");
+            table = myDB.SELECT(
+               new List<string>() { "*" },
+                new List<string>() { "ZakazInfo" },
+                new List<myTuple>()
+                {
+                    new myTuple("ZakazID", id)
+                }
+
+                );
             dataGridView1.DataSource = table;
             dataGridView1.AllowUserToAddRows = false;
             LoadShops();
@@ -137,13 +151,13 @@ namespace gulshatLABA
             {
                 if (dataGridView1.Rows[i].Cells[9].Value != null)
                 {
-                    int shopID = int.Parse((string)dataGridView1.Rows[i].Cells[9].Value);
+                    int shopID = ShopIDForName[(string)dataGridView1.Rows[i].Cells[9].Value];
                     int zakazID = int.Parse((string)dataGridView1.Rows[i].Cells[0].Value);
                     int tovarID = int.Parse((string)dataGridView1.Rows[i].Cells[7].Value);
                     myDB.Update(
-                        "TovarInZakaz", 
-                        new List<myTuple> { new myTuple ("ID_shop", shopID) },
-                        new List<myTuple> { new myTuple("ID_Tovar", tovarID), new myTuple ("ID_Zakaz", zakazID) }
+                        "TovarInZakaz",
+                        new List<myTuple> { new myTuple("ID_Shop", shopID) },
+                        new List<myTuple> { new myTuple("ID_Tovar", tovarID), new myTuple("ID_Zakaz", zakazID) }
 
                        );
                 }

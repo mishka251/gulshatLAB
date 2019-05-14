@@ -17,6 +17,8 @@ namespace gulshatLABA
             InitializeComponent();
         }
 
+
+
         private void Tovar_Load(object sender, EventArgs e)
         {
             DataTable table = myDB.SELECT_ALL("Tovar");

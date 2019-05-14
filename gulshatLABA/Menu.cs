@@ -55,8 +55,14 @@ namespace gulshatLABA
 
         private void button6_Click(object sender, EventArgs e)
         {
-            WorkForm w = new WorkForm();
+            SelectForm w = new SelectForm();
             w.Show();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            CreateZakaz cz = new CreateZakaz();
+            cz.Show();
         }
     }
 }

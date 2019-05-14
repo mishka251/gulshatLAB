@@ -60,26 +60,39 @@ namespace gulshatLABA
         public static DataTable SELECT(
             List<string> fields,
             List<string> tables,
-            List<string> conditions = null
+            List<myTuple> conditions = null
             )
         {
 
+            SqlCommand command = sqlConnection.CreateCommand();
+
+
             string f = String.Join(", ", fields);
             string t = String.Join(", ", tables);
-            string cond = conditions == null ? "" : "WHERE " + String.Join(" AND ", conditions);
+            string cond = "";
+
+            if (conditions != null)
+            {
+                List<string> conds = new List<string>();
+                foreach (myTuple mt in conditions)
+                {
+                    conds.Add($"{mt.name}=@{mt.name}1");
+                    command.Parameters.Add(new SqlParameter($"@{mt.name}1", mt.obj));
+                }
+                cond = "WHERE " + String.Join(" AND ", conds);
+            }
 
             string SQL = $"SELECT {f} FROM {t} {cond}";
 
             DataTable res = new DataTable();
 
 
-            SqlCommand command = sqlConnection.CreateCommand();
             command.CommandText = SQL;
             var reader = command.ExecuteReader();
             int cols = reader.FieldCount;
 
             for (int i = 0; i < cols; i++)
-                res.Columns.Add(new DataColumn(fields[i]));
+                res.Columns.Add(new DataColumn(reader.GetName(i)));
 
             object[] row = new object[cols];
             while (reader.Read())
@@ -149,8 +162,38 @@ namespace gulshatLABA
 
             }
 
+            string[] cols = new string[values.Columns.Count];
+            for (int i = 0; i < values.Columns.Count; i++)
+                cols[i] = values.Columns[i].ColumnName;
+
+            string col = "(" + String.Join(",", cols) + ")";
             string vals = String.Join(", ", lines);
-            cmd.CommandText = $"INSERT INTO {table} VALUES {vals};";
+            cmd.CommandText = $"INSERT INTO {table} {col} VALUES {vals};";
+            cmd.ExecuteNonQuery();
+        }
+
+
+        public static void INSERT(string table, List<myTuple> values)
+        {
+            SqlCommand cmd = sqlConnection.CreateCommand();
+
+
+
+            string[] param = new string[values.Count];
+            string[] fields = new string[values.Count];
+            for (int j = 0; j < values.Count; j++)
+            {
+                string par_name = $"@{values[j].name}1";
+                fields[j] = values[j].name;
+                param[j] = par_name;
+                cmd.Parameters.Add(new SqlParameter(par_name, values[j].obj));
+            }
+            string line = "(" + String.Join(",", param) + ")";
+            string field = "(" + String.Join(",", fields) + ")";
+
+
+
+            cmd.CommandText = $"INSERT INTO {table} {field} VALUES {line};";
             cmd.ExecuteNonQuery();
         }
 
@@ -209,10 +252,10 @@ namespace gulshatLABA
 
 
         }
-        public static void Update(string tableName, DataTable newTable)
-        {
+        /*  public static void Update(string tableName, DataTable newTable)
+          {
 
-        }
+          }*/
 
         public static void Update(string table, List<myTuple> vals, List<myTuple> conditions)
         {
